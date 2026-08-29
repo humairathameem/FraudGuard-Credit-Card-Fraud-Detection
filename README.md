@@ -79,16 +79,16 @@ The main objectives of this project are:
 - [x] Exploratory Data Analysis (EDA)
 - [x] Analyze Class Imbalance
 - [x] Understand Why Accuracy Is Misleading
+- [x] Train-Test Split with Stratification
+- [x] Scale Amount and Time Features
+- [x] Baseline Logistic Regression
+- [x] Handle Class Imbalance using Class Weights
+- [x] Handle Class Imbalance using SMOTE
+- [x] Random Forest Classifier
+- [x] Model Evaluation and Comparison
 
 ### In Progress
 
-- [ ] Train-Test Split with Stratification
-- [ ] Scale Amount and Time Features
-- [ ] Baseline Logistic Regression
-- [ ] Handle Class Imbalance using Class Weights
-- [ ] Handle Class Imbalance using SMOTE
-- [ ] Random Forest Classifier
-- [ ] Model Evaluation and Comparison
 - [ ] Confusion Matrix
 - [ ] ROC Curve and ROC-AUC
 - [ ] Precision-Recall Curve and PR-AUC
@@ -169,13 +169,4 @@ Because this is a highly imbalanced classification problem, model performance wi
 
 Accuracy will not be treated as the primary performance metric because it can be misleading when the minority class is extremely small.
 
----
 
-## Project Structure
-
-```text
-FraudGuard/
-│
-├── FraudGuard.ipynb
-├── creditcard.csv
-└── README.md
