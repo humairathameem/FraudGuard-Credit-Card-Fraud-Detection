@@ -2,17 +2,19 @@
 
 ## Project Overview
 
-FraudGuard is a machine learning project focused on detecting fraudulent credit card transactions from highly imbalanced data.
+FraudGuard is a machine learning project where I worked on detecting fraudulent credit card transactions from a highly imbalanced dataset.
 
-Credit card fraud detection is a challenging classification problem because fraudulent transactions are extremely rare compared with legitimate transactions. A model can achieve very high accuracy by simply predicting most transactions as legitimate, while still failing to detect actual fraud.
+The main challenge in this project is that fraud is very rare. Out of 284,807 transactions, only 492 are fraudulent. Because of this, a model can get a very high accuracy score simply by predicting almost every transaction as legitimate, while still missing many fraud cases.
 
-The goal of this project is to build and evaluate machine learning models that can identify fraudulent transactions while focusing on meaningful metrics such as precision, recall, F1-score, ROC-AUC, and Precision-Recall AUC.
+So, instead of focusing only on accuracy, I explored metrics such as precision, recall, F1-score, ROC-AUC, Precision-Recall AUC, and the confusion matrix.
+
+I also experimented with different ways of handling class imbalance and compared Logistic Regression with Random Forest before tuning the final decision threshold.
 
 ---
 
 ## Dataset
 
-The project uses the publicly available **Credit Card Fraud Detection** dataset from Kaggle.
+I used the publicly available **Credit Card Fraud Detection** dataset from Kaggle.
 
 Dataset:
 
@@ -24,42 +26,46 @@ The dataset contains:
 - 31 columns
 - 492 fraudulent transactions
 - 284,315 legitimate transactions
-- Approximately 0.17% of transactions are fraudulent
+- Only about 0.17% of the transactions are fraudulent
 
-The target variable is:
+The target column is `Class`:
 
-- `Class = 0` → Legitimate transaction
-- `Class = 1` → Fraudulent transaction
+- `0` → Legitimate transaction
+- `1` → Fraudulent transaction
 
-Most of the transaction features are anonymized as `V1` to `V28`.
+Most of the transaction features are anonymized and are represented as `V1` to `V28`.
 
 ---
 
 ## Project Objectives
 
-The main objectives of this project are:
+Through this project, I aimed to:
 
-- Understand the structure of the transaction data
+- Understand the structure of the dataset
 - Perform exploratory data analysis
-- Analyze the severe class imbalance
-- Understand why accuracy is misleading for fraud detection
-- Scale the required numerical features
-- Split the data using stratification
+- Understand the severe class imbalance
+- Understand why accuracy can be misleading
+- Scale the `Time` and `Amount` features
+- Perform a stratified train-test split
 - Build a baseline Logistic Regression model
-- Handle class imbalance using class weights
-- Experiment with SMOTE oversampling
-- Train a Random Forest classifier
-- Compare model performance
-- Tune the classification decision threshold
-- Select and evaluate the final model
-- Interpret the model and analyze prediction errors
+- Try class weighting to handle imbalance
+- Try SMOTE oversampling
+- Train a Random Forest model
+- Compare the different approaches
+- Study confusion matrices
+- Compare ROC-AUC and PR-AUC
+- Tune the decision threshold
+- Evaluate the final model
+- Understand the model's errors and limitations
 
 ---
 
-## Tools and Technologies
+## Tools and Libraries
+
+The project was developed using:
 
 - Python 3.x
-- Jupyter Notebook / VS Code
+- VS Code / Jupyter Notebook
 - pandas
 - NumPy
 - Matplotlib
@@ -103,94 +109,115 @@ The main objectives of this project are:
 
 ---
 
-## Exploratory Data Analysis
+# Exploratory Data Analysis
 
-The initial analysis was performed to understand the structure and characteristics of the dataset before building machine learning models.
+Before training any models, I first explored the dataset to understand what kind of data I was working with.
 
 ### Dataset Structure
 
 The dataset contains 284,807 transactions and 31 columns.
 
-All columns contain values for every transaction, so no missing-value treatment is required at this stage.
+All columns had complete data, so there were no missing values that needed to be handled.
 
-A total of 1,081 duplicate rows were identified during the initial dataset inspection. These duplicates were considered during the preprocessing stage rather than being removed automatically.
+During the initial inspection, I found 1,081 duplicate rows. I did not remove them automatically because duplicate transactions can be meaningful in a fraud detection dataset and should be considered carefully rather than removed without understanding their context.
 
 ### Class Imbalance
 
-The dataset is extremely imbalanced:
+The biggest issue I found during EDA was the huge difference between legitimate and fraudulent transactions.
 
 | Class | Transaction Type | Count | Percentage |
 |------:|------------------|------:|-----------:|
 | 0 | Legitimate | 284,315 | 99.8273% |
 | 1 | Fraudulent | 492 | 0.1727% |
 
-There are roughly 578 legitimate transactions for every fraudulent transaction.
+This means there are roughly 578 legitimate transactions for every fraudulent transaction.
 
-This severe imbalance is one of the main challenges of the project.
+This imbalance became one of the main challenges I had to deal with during the modelling stage.
 
 ### Transaction Amount
 
-The `Amount` feature contains transaction values with a wide range and a skewed distribution.
+The `Amount` feature has a wide and skewed distribution.
 
-The transaction amount distributions of legitimate and fraudulent transactions show differences, but there is still overlap between the two classes. Therefore, transaction amount alone cannot reliably identify fraudulent transactions.
+When comparing the transaction amounts of legitimate and fraudulent transactions, I could see some differences between the two groups. However, there was still considerable overlap.
+
+This showed that transaction amount by itself would not be enough to reliably identify fraud.
 
 ### Correlation Analysis
 
-Correlation analysis was performed to understand the linear relationship between the numerical features and the target variable.
+I also looked at the correlations between the numerical features and the `Class` column.
 
-The anonymized features (`V1` to `V28`) show different levels of correlation with the `Class` variable. Some features have stronger relationships with the target, while others have relatively weak linear relationships.
+The anonymized features from `V1` to `V28` showed different levels of correlation with the target. Some features had stronger relationships with fraud, while others had weaker relationships.
 
-Correlation was treated as an exploratory tool rather than as the sole basis for feature selection.
+I treated correlation as an exploratory tool rather than using it alone to decide which features should be included in the model.
 
 ---
 
-## Key Findings from EDA
+# Key Findings from EDA
 
-The EDA highlighted several important characteristics of the dataset:
+The EDA helped me understand a few important things before moving into modelling:
 
 1. Fraudulent transactions are extremely rare.
-2. The dataset is highly imbalanced.
-3. Accuracy alone would not be a reliable measure of fraud detection performance.
+2. The dataset is heavily imbalanced.
+3. Accuracy by itself would not give a useful picture of model performance.
 4. Transaction amounts have a wide and skewed distribution.
-5. The anonymized features have different relationships with the fraud target.
-6. Appropriate preprocessing and imbalance-handling techniques are important for building a useful fraud detection model.
+5. The anonymized features have different relationships with the target.
+6. Handling the class imbalance would be an important part of the modelling process.
 
 ---
 
-## Handling Class Imbalance
+# Handling Class Imbalance
 
-Three approaches were explored to understand how different imbalance-handling strategies affect model performance:
+Since fraud represented only 0.1727% of the dataset, I experimented with different approaches to deal with the imbalance.
 
-### 1. Baseline Logistic Regression
+### Baseline Logistic Regression
 
-The first Logistic Regression model was trained without any special imbalance-handling technique.
+I first trained a Logistic Regression model without applying any special imbalance-handling technique.
 
-This provided a baseline against which the other approaches could be compared.
+This gave me a baseline that I could use to understand how the model behaved before making any changes.
 
-### 2. Class-Weighted Logistic Regression
+The baseline model achieved:
 
-Class weights were used to give more importance to fraudulent transactions during model training.
+- Precision: 82.89%
+- Recall: 64.29%
+- F1-score: 72.41%
+- ROC-AUC: 95.59%
+- PR-AUC: 74.32%
 
-This significantly increased fraud recall, but also produced a large number of false positives.
+Although the accuracy was 99.92%, the recall showed that the model was still missing a significant number of fraudulent transactions.
 
-### 3. SMOTE Logistic Regression
+### Class-Weighted Logistic Regression
 
-SMOTE (Synthetic Minority Over-sampling Technique) was applied to the training data to generate synthetic examples of the minority fraud class.
+Next, I used class weights so that fraudulent transactions would receive more importance during training.
 
-The test set was kept unchanged to ensure that model evaluation remained representative of the original data distribution.
+This increased fraud recall from 64.29% to 91.84%.
+
+However, precision dropped significantly to 6.10%.
+
+In other words, the model became much more aggressive about detecting fraud, but it also started incorrectly flagging many legitimate transactions.
+
+### SMOTE Logistic Regression
+
+I then tried SMOTE, which stands for Synthetic Minority Over-sampling Technique.
+
+SMOTE creates synthetic examples of the minority class instead of simply duplicating existing fraud transactions.
+
+I applied SMOTE only to the training data and kept the test set unchanged.
+
+The SMOTE model achieved:
+
+- Precision: 5.80%
+- Recall: 91.84%
+- F1-score: 10.92%
+- ROC-AUC: 96.99%
+- PR-AUC: 72.49%
+
+The model detected more fraud cases, but again produced a very large number of false positives.
 
 ---
 
-## Model Evaluation and Comparison
+# Model Comparison
 
-Four models were evaluated:
-
-- Baseline Logistic Regression
-- Class-Weighted Logistic Regression
-- SMOTE Logistic Regression
-- Random Forest
-
-The following results were obtained on the test set:
+After experimenting with Logistic Regression and different imbalance-handling methods, I trained a Random Forest model and compared all four approaches.
 
 | Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC | PR-AUC |
 |---|---:|---:|---:|---:|---:|---:|
@@ -199,21 +226,20 @@ The following results were obtained on the test set:
 | SMOTE Logistic Regression | 0.9742 | 0.0580 | 0.9184 | 0.1092 | 0.9699 | 0.7249 |
 | Random Forest | 0.9996 | 0.9412 | 0.8163 | 0.8743 | 0.9630 | 0.8734 |
 
-These results show that the different imbalance-handling approaches produce significantly different precision-recall trade-offs.
+The results were interesting because there was no single metric that made every model look best.
 
-The class-weighted and SMOTE Logistic Regression models achieved higher recall but produced many false positives.
+The class-weighted Logistic Regression model had the highest ROC-AUC, but its precision was extremely low.
 
-Random Forest provided a much stronger balance between precision and recall at the default threshold.
+Random Forest, on the other hand, had the highest PR-AUC and provided a much better balance between precision and recall.
 
 ---
 
-## Confusion Matrix Analysis
+# Confusion Matrix Analysis
 
-The confusion matrices provided additional insight into the types of errors made by each model.
+I used confusion matrices to understand exactly what kinds of mistakes each model was making.
 
 ### Baseline Logistic Regression
 
 ```text
 [[56851    13]
  [   35    63]]
-
