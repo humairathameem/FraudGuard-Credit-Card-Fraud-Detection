@@ -15,6 +15,7 @@ The goal of this project is to build and evaluate machine learning models that c
 The project uses the publicly available **Credit Card Fraud Detection** dataset from Kaggle.
 
 Dataset:
+
 https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
 
 The dataset contains:
@@ -79,21 +80,21 @@ The main objectives of this project are:
 - [x] Exploratory Data Analysis (EDA)
 - [x] Analyze Class Imbalance
 - [x] Understand Why Accuracy Is Misleading
-- [x] Train-Test Split with Stratification
 - [x] Scale Amount and Time Features
+- [x] Train-Test Split with Stratification
 - [x] Baseline Logistic Regression
 - [x] Handle Class Imbalance using Class Weights
 - [x] Handle Class Imbalance using SMOTE
 - [x] Random Forest Classifier
 - [x] Model Evaluation and Comparison
+- [x] Confusion Matrix
+- [x] ROC Curve and ROC-AUC
+- [x] Precision-Recall Curve and PR-AUC
+- [x] Decision Threshold Tuning
+- [x] Final Model Evaluation
 
-### In Progress
+### Remaining
 
-- [ ] Confusion Matrix
-- [ ] ROC Curve and ROC-AUC
-- [ ] Precision-Recall Curve and PR-AUC
-- [ ] Decision Threshold Tuning
-- [ ] Final Model Evaluation
 - [ ] Final Model Selection and Justification
 - [ ] Feature and Model Interpretation
 - [ ] Error Analysis
@@ -112,7 +113,7 @@ The dataset contains 284,807 transactions and 31 columns.
 
 All columns contain values for every transaction, so no missing-value treatment is required at this stage.
 
-A total of 1,081 duplicate rows were identified during the initial dataset inspection. These duplicates will be considered carefully during the preprocessing stage rather than being removed automatically.
+A total of 1,081 duplicate rows were identified during the initial dataset inspection. These duplicates were considered during the preprocessing stage rather than being removed automatically.
 
 ### Class Imbalance
 
@@ -129,9 +130,9 @@ This severe imbalance is one of the main challenges of the project.
 
 ### Transaction Amount
 
-The `Amount` feature contains transaction values with a wide range. The distribution also contains large values, making it useful to examine the feature using a logarithmic scale.
+The `Amount` feature contains transaction values with a wide range and a skewed distribution.
 
-When comparing transaction amounts between legitimate and fraudulent transactions, the distributions show differences, but there is still overlap between the two classes. This means transaction amount alone cannot reliably identify fraud.
+The transaction amount distributions of legitimate and fraudulent transactions show differences, but there is still overlap between the two classes. Therefore, transaction amount alone cannot reliably identify fraudulent transactions.
 
 ### Correlation Analysis
 
@@ -139,11 +140,11 @@ Correlation analysis was performed to understand the linear relationship between
 
 The anonymized features (`V1` to `V28`) show different levels of correlation with the `Class` variable. Some features have stronger relationships with the target, while others have relatively weak linear relationships.
 
-Correlation will be treated as an exploratory tool rather than as the sole basis for feature selection.
+Correlation was treated as an exploratory tool rather than as the sole basis for feature selection.
 
 ---
 
-## Key Findings So Far
+## Key Findings from EDA
 
 The EDA highlighted several important characteristics of the dataset:
 
@@ -152,21 +153,67 @@ The EDA highlighted several important characteristics of the dataset:
 3. Accuracy alone would not be a reliable measure of fraud detection performance.
 4. Transaction amounts have a wide and skewed distribution.
 5. The anonymized features have different relationships with the fraud target.
-6. Appropriate preprocessing and imbalance-handling techniques will be important for building useful models.
+6. Appropriate preprocessing and imbalance-handling techniques are important for building a useful fraud detection model.
 
 ---
 
-## Evaluation Strategy
+## Handling Class Imbalance
 
-Because this is a highly imbalanced classification problem, model performance will be evaluated primarily using:
+Three approaches were explored to understand how different imbalance-handling strategies affect model performance:
 
-- Precision
-- Recall
-- F1-score
-- ROC-AUC
-- Precision-Recall AUC
-- Confusion Matrix
+### 1. Baseline Logistic Regression
 
-Accuracy will not be treated as the primary performance metric because it can be misleading when the minority class is extremely small.
+The first Logistic Regression model was trained without any special imbalance-handling technique.
 
+This provided a baseline against which the other approaches could be compared.
+
+### 2. Class-Weighted Logistic Regression
+
+Class weights were used to give more importance to fraudulent transactions during model training.
+
+This significantly increased fraud recall, but also produced a large number of false positives.
+
+### 3. SMOTE Logistic Regression
+
+SMOTE (Synthetic Minority Over-sampling Technique) was applied to the training data to generate synthetic examples of the minority fraud class.
+
+The test set was kept unchanged to ensure that model evaluation remained representative of the original data distribution.
+
+---
+
+## Model Evaluation and Comparison
+
+Four models were evaluated:
+
+- Baseline Logistic Regression
+- Class-Weighted Logistic Regression
+- SMOTE Logistic Regression
+- Random Forest
+
+The following results were obtained on the test set:
+
+| Model | Accuracy | Precision | Recall | F1-Score | ROC-AUC | PR-AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| Baseline Logistic Regression | 0.9992 | 0.8289 | 0.6429 | 0.7241 | 0.9559 | 0.7432 |
+| Class-Weighted Logistic Regression | 0.9755 | 0.0610 | 0.9184 | 0.1144 | 0.9722 | 0.7159 |
+| SMOTE Logistic Regression | 0.9742 | 0.0580 | 0.9184 | 0.1092 | 0.9699 | 0.7249 |
+| Random Forest | 0.9996 | 0.9412 | 0.8163 | 0.8743 | 0.9630 | 0.8734 |
+
+These results show that the different imbalance-handling approaches produce significantly different precision-recall trade-offs.
+
+The class-weighted and SMOTE Logistic Regression models achieved higher recall but produced many false positives.
+
+Random Forest provided a much stronger balance between precision and recall at the default threshold.
+
+---
+
+## Confusion Matrix Analysis
+
+The confusion matrices provided additional insight into the types of errors made by each model.
+
+### Baseline Logistic Regression
+
+```text
+[[56851    13]
+ [   35    63]]
 
