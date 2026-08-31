@@ -1,0 +1,5 @@
+,Model,ROC-AUC
+0,Baseline Logistic Regression,0.9558983554029378
+1,Class-Weighted Logistic Regression,0.9721687370080279
+2,SMOTE Logistic Regression,0.9698631105509169
+3,Random Forest,0.9630272515590367

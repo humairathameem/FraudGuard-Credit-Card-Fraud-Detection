@@ -1,0 +1,5 @@
+,Model,PR-AUC
+0,Baseline Logistic Regression,0.7431691767832423
+1,Class-Weighted Logistic Regression,0.7159122424484009
+2,SMOTE Logistic Regression,0.7249139606556327
+3,Random Forest,0.8733910547021404
